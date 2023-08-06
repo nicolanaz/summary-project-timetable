@@ -213,29 +213,33 @@ public class PersonalTimetableBot extends TelegramLongPollingBot {
         log.info(String.format("Statistics sent (chat id: %d)", chatId));
     }
 
-    private void sendMessage(long chat_id, String textToSend) {
-        SendMessage sendMessage = new SendMessage(String.valueOf(chat_id), textToSend);
+    private void sendMessage(long chatId, String textToSend) {
+        SendMessage sendMessage = new SendMessage(String.valueOf(chatId), textToSend);
 
         try {
             execute(sendMessage);
         } catch (TelegramApiException e) {
-
+            log.warn(String.format("Some problems with sending message (chat id: %d message: %s)", chatId, textToSend));
         }
 
-        log.info(String.format("Message sent (chat id: %d)", chat_id));
+        log.info(String.format("Message sent (chat id: %d)", chatId));
     }
 
-    private void sendTasksForDay(long chat_id, List<TaskDto> taskDtos) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Задачи на сегодня:\n\n");
+    private void sendTasksForDay(long chatId, List<TaskDto> taskDtos) {
+        if (taskDtos.isEmpty()) {
+            sendMessage(chatId, "Задач на сегодня не найдено");
+        } else {
+            StringBuilder sb = new StringBuilder();
+            sb.append("Задачи на сегодня:\n\n");
 
-        for (TaskDto taskDto : taskDtos) {
-            sb.append(taskDto.getTask() + " - " + taskDto.getHaveToDoTime().toLocalTime() + "\n");
+            for (TaskDto taskDto : taskDtos) {
+                sb.append(taskDto.getTask() + " - " + taskDto.getHaveToDoTime().toLocalTime() + "\n");
+            }
+
+            sendMessage(chatId, sb.toString());
         }
 
-        sendMessage(chat_id, sb.toString());
-
-        log.info(String.format("Tasks for day sent (chat id: %d)", chat_id));
+        log.info(String.format("Tasks for day sent (chat id: %d)", chatId));
     }
 
     private boolean isAddTaskProcessStarted(long chatId) {

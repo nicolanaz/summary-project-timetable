@@ -6,6 +6,8 @@ import com.example.summarybackendprojecttimetable.model.TaskDto;
 import com.example.summarybackendprojecttimetable.service.ScheduleService;
 import com.example.summarybackendprojecttimetable.service.TaskService;
 import lombok.AllArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,20 +22,20 @@ public class TaskController {
     private TaskMapper taskMapper;
 
     @PostMapping
-    public String addNewTask(@RequestBody TaskDto taskDto) {
+    public ResponseEntity<String> addNewTask(@RequestBody TaskDto taskDto) {
         Task task = taskMapper.dtoToTask(taskDto);
         scheduleService.saveTaskReminder(task);
-        return taskService.saveTask(task);
+        return new ResponseEntity<>(taskService.saveTask(task), HttpStatus.OK);
     }
 
     @GetMapping("/{userId}")
-    public List<TaskDto> getTasksForDay(@PathVariable("userId") Long userId) {
-        return taskMapper.toDtoList(taskService.getTasksForDay(userId));
+    public ResponseEntity<List<TaskDto>> getTasksForDay(@PathVariable("userId") Long userId) {
+        List<TaskDto> result = taskMapper.toDtoList(taskService.getTasksForDay(userId));
+        return new ResponseEntity<>(result, HttpStatus.OK);
     }
 
     @GetMapping("/completed")
-    public String completeTask(@RequestParam("id") Long id) {
-        return taskService.taskCompleted(id);
+    public ResponseEntity<String> completeTask(@RequestParam("id") Long id) {
+        return new ResponseEntity<>(taskService.taskCompleted(id), HttpStatus.OK);
     }
-
 }
